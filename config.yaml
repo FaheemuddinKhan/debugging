@@ -1,0 +1,6 @@
+env:
+  name: E5
+
+application:
+  name: hello-world
+  namespace: hi
