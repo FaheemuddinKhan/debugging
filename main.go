@@ -2,36 +2,38 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"strings"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
+type BarConfig struct {
+	Baz int `mapstructure:"baz"`
+	Too int `mapstructure:"too"`
+}
+
+type Config struct {
+	Foo int
+	Bar BarConfig `mapstructure:"baar"`
+}
+
 func main() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
+	v := viper.New()
+	v.SetEnvPrefix("PREFIX")
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+	v.AutomaticEnv()
+	v.SetConfigFile("./.config.env")
 
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Println("Config file not found")
-		} else {
-			log.Printf("unexpected error occured %v", err)
-		}
+	err := v.ReadInConfig()
+	if err != nil {
+		fmt.Println("error: ", err)
 	}
-	log.Println("Config file found and successfully parsed")
 
-	fmt.Println(viper.Get("env.name"))
+	var cfg Config
+	err = v.Unmarshal(&cfg)
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
 
-	viper.Set("env.name", "E2")
-	fmt.Println(viper.Get("env.name"))
-
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("Config file changed:", e.Name)
-		fmt.Println(viper.Get("env"))
-		fmt.Println(viper.AllSettings())
-	})
-	viper.WatchConfig()
-
-	<-make(chan struct{})
+	fmt.Printf("%#v\n", cfg)
 }
