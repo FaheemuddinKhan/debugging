@@ -19,16 +19,16 @@ type Config struct {
 
 func main() {
 	v := viper.New()
-	v.SetEnvPrefix("PREFIX")
-	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+	// v.SetEnvPrefix("PREFIX")
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
-	v.SetConfigFile("./.config.env")
+	// v.SetConfigFile("./.config.env")
 
 	err := v.ReadInConfig()
 	if err != nil {
 		fmt.Println("error: ", err)
 	}
-
+	fmt.Printf("baar.baz = %v", viper.Get("baar_baz"))
 	var cfg Config
 	err = v.Unmarshal(&cfg)
 	if err != nil {
